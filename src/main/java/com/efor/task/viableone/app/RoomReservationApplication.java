@@ -1,4 +1,4 @@
-package com.efor.task.viableone;
+package com.efor.task.viableone.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
