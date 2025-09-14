@@ -222,6 +222,7 @@ logbook:
 - Possible separation of integration testing (future DB) and unit testing using service mocking
 - Optimization for a large number of rooms
 - Contract first approach (creating an OpenAPI specification)
+- Consider changing the booking endpoint to `/rooms/{roomId}/reservations`
 
 ## License
 
