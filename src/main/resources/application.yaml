@@ -1,3 +1,7 @@
 spring:
   application:
     name: room-reservation-svc
+
+logbook:
+  format:
+    style: http

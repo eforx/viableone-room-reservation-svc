@@ -29,6 +29,9 @@ dependencies {
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
+    // Observability
+    implementation("org.zalando:logbook-spring-boot-starter:3.12.1")
+
     // Other
     implementation("com.google.guava:guava:33.3.1-jre")
 

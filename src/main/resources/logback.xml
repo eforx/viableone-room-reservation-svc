@@ -5,4 +5,8 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
     </root>
+
+    <logger name="org.zalando.logbook" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
 </configuration>
