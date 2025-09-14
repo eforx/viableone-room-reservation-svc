@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
     // Observability
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.zalando:logbook-spring-boot-starter:3.12.1")
 
     // Other

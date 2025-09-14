@@ -5,3 +5,9 @@ spring:
 logbook:
   format:
     style: http
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
