@@ -19,8 +19,17 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web")
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // Serialization
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    // Other
     implementation("com.google.guava:guava:33.3.1-jre")
+
+    // TEST
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core:3.27.4")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")

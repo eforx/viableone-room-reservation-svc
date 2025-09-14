@@ -183,7 +183,7 @@ public class DefaultRoomReservationService implements RoomReservationService {
     /**
      * For testing purposes.
      */
-    void reset() {
+    public void reset() {
         roomReservationsMap.clear();
     }
 
