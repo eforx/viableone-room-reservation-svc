@@ -1,21 +1,25 @@
 package com.efor.task.viableone.reservation.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 
 /**
  * Response payload returned after attempting to book a room.
- * <p>
- * Contains the room identifier and the reservation interval that the server
- * processed. The semantics of the HTTP status code indicate whether a new
- * reservation was created (201) or a conflict occurred (409).
- * </p>
- *
- * @param roomId            identifier of the room related to the reservation
- * @param reservationStart  inclusive start of the reservation window (UTC)
- * @param reservationEnd    exclusive end of the reservation window (UTC)
+ * Uses HTTP 201 for success, 409 when a conflicting reservation exists.
  */
+@Schema(
+        name = "BookRoomResponse",
+        description = "Echoes the room id and interval that were processed by the booking endpoint."
+)
 public record BookRoomResponse(
+        @Schema(description = "Identifier of the room related to the reservation.", example = "R-101")
         String roomId,
+
+        @Schema(description = "Inclusive start of the reservation window (UTC).", format = "date-time", example = "2025-09-20T08:00:00Z")
         Instant reservationStart,
+
+        @Schema(description = "Exclusive end of the reservation window (UTC).", format = "date-time", example = "2025-09-20T10:00:00Z")
         Instant reservationEnd
-) {}
+) {
+}

@@ -26,6 +26,9 @@ dependencies {
     // Serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    // Swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+
     // Other
     implementation("com.google.guava:guava:33.3.1-jre")
 
