@@ -79,6 +79,8 @@ API documentation in OpenAPI format: http://localhost:8080/v3/api-docs
 
 ## API Endpoints
 
+[Acceptance tests using curl](AcceptanceTests.MD)
+
 ### Book a Room
 
 Attempts to create a reservation for the given room and time interval.  
