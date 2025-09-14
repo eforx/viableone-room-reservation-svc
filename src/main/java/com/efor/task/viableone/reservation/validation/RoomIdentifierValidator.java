@@ -6,7 +6,7 @@ package com.efor.task.viableone.reservation.validation;
 public interface RoomIdentifierValidator {
     /**
      * Validates the given room identifier.
-     * @param roomIdentifier
+     * @param roomIdentifier the identifier to validate
      * @throws RoomIdentifierValidatorException if the identifier is invalid
      */
     void validate(String roomIdentifier);
