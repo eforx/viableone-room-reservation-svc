@@ -7,6 +7,7 @@ import com.efor.task.viableone.reservation.RoomReservationService;
 import com.efor.task.viableone.reservation.model.ReservationInterval;
 import com.efor.task.viableone.reservation.model.RoomReservations;
 import com.efor.task.viableone.reservation.validation.IntervalValidator;
+import com.efor.task.viableone.reservation.validation.RoomIdentifierValidator;
 import com.efor.task.viableone.reservation.validation.RoomReservationValidator;
 import com.google.common.util.concurrent.Striped;
 import org.slf4j.Logger;
@@ -34,14 +35,17 @@ import java.util.stream.Collectors;
 public class DefaultRoomReservationService implements RoomReservationService {
 
     public DefaultRoomReservationService(RoomReservationValidator roomReservationValidator,
+                                         RoomIdentifierValidator roomIdentifierValidator,
                                          IntervalValidator intervalValidator) {
         this.roomReservationValidator = roomReservationValidator;
+        this.roomIdentifierValidator = roomIdentifierValidator;
         this.intervalValidator = intervalValidator;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultRoomReservationService.class);
 
     private final RoomReservationValidator roomReservationValidator;
+    private final RoomIdentifierValidator roomIdentifierValidator;
     private final IntervalValidator intervalValidator;
     private final Map<String, RoomReservations> roomReservationsMap = new ConcurrentHashMap<>();
     private final Striped<Lock> roomLocks = Striped.lock(1024);
@@ -126,6 +130,10 @@ public class DefaultRoomReservationService implements RoomReservationService {
 
     @Override
     public List<RoomReservationInfo> getReservations(String roomId) {
+        logger.info("Get room reservations. roomId='{}'", roomId);
+
+        roomIdentifierValidator.validate(roomId);
+
         var roomReservations = roomReservationsMap.get(roomId);
         if (roomReservations == null) {
             throw new IllegalArgumentException("Room '" + roomId + "' not found");
@@ -144,6 +152,8 @@ public class DefaultRoomReservationService implements RoomReservationService {
 
     @Override
     public Map<String, List<RoomReservationInfo>> getAllReservations() {
+        logger.info("Get all room reservations");
+
         return roomReservationsMap.entrySet().stream()
                 .map(e -> {
                             String roomId = e.getKey();

@@ -8,13 +8,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultRoomReservationValidator implements RoomReservationValidator {
 
-    public DefaultRoomReservationValidator(IntervalValidator intervalValidator) {
+    public DefaultRoomReservationValidator(
+            RoomIdentifierValidator roomIdentifierValidator,
+            IntervalValidator intervalValidator) {
+        this.roomIdentifierValidator = roomIdentifierValidator;
         this.intervalValidator = intervalValidator;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultRoomReservationValidator.class);
 
     private final IntervalValidator intervalValidator;
+    private final RoomIdentifierValidator roomIdentifierValidator;
 
     @Override
     public void validate(RoomReservation reservation) {
@@ -24,10 +28,11 @@ public class DefaultRoomReservationValidator implements RoomReservationValidator
             throw new RoomReservationValidatorException("Room reservation must not be null");
         }
 
-        if (reservation.roomId() == null || reservation.roomId().isBlank()) {
-            throw new RoomReservationValidatorException("Room reservation must have set a roomId");
+        try {
+            roomIdentifierValidator.validate(reservation.roomId());
+            intervalValidator.validate(reservation.reservationStart(), reservation.reservationEnd());
+        } catch (Exception e) {
+            throw new RoomReservationValidatorException("Room reservation validation failed", e);
         }
-
-        intervalValidator.validate(reservation.reservationStart(), reservation.reservationEnd());
     }
 }

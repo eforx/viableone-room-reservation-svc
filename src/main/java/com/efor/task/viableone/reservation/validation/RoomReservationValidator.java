@@ -8,7 +8,7 @@ import com.efor.task.viableone.reservation.RoomReservation;
 public interface RoomReservationValidator {
     /**
      * Validates the given {@link RoomReservation}.
-     * @param reservation
+     * @param reservation the reservation to validate
      * @throws RoomReservationValidatorException if the reservation is invalid
      */
     void validate(RoomReservation reservation);

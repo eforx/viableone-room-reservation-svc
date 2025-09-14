@@ -11,6 +11,7 @@ public interface IntervalValidator {
      *
      * @param intervalStart Inclusive start of the reservation, as an {@link java.time.Instant} (UTC).
      * @param intervalEnd   Exclusive end of the reservation, as an {@link java.time.Instant} (UTC).
+     * @throws IntervalValidatorException if the interval violates configured constraints
      */
     void validate(Instant intervalStart, Instant intervalEnd);
 }

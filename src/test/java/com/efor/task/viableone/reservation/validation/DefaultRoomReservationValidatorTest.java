@@ -44,7 +44,7 @@ class DefaultRoomReservationValidatorTest {
                         instant("2025-01-01T13:00:00Z"),
                         instant("2025-01-01T12:00:00Z")
                 )
-        )).isInstanceOf(IntervalValidatorException.class);
+        )).isInstanceOf(RoomReservationValidatorException.class);
     }
 
     private Instant instant(String s) {
@@ -52,6 +52,9 @@ class DefaultRoomReservationValidatorTest {
     }
 
     private DefaultRoomReservationValidator createValidator() {
-        return new DefaultRoomReservationValidator(new DefaultIntervalValidator());
+        return new DefaultRoomReservationValidator(
+                new DefaultRoomIdentifierValidator(),
+                new DefaultIntervalValidator()
+        );
     }
 }
