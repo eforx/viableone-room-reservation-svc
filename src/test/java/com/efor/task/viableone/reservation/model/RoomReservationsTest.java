@@ -6,11 +6,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.Instant;
 
-class ReservationsTest {
+class RoomReservationsTest {
 
     @Test
     void findCollision_NoCollisions() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -26,7 +26,7 @@ class ReservationsTest {
 
     @Test
     void findCollision_NoCollisions_LongerPeriod() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2024-12-13T12:00:00Z"), instant("2024-12-14T20:50:00Z"));
         reservations.add(instant("2024-12-15T08:45:00Z"), instant("2025-01-03T18:25:00Z"));
@@ -36,7 +36,7 @@ class ReservationsTest {
 
     @Test
     void findCollision_NestedIntervalCollision() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -50,7 +50,7 @@ class ReservationsTest {
 
     @Test
     void findCollision_OverlapIntervalCollision() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -62,7 +62,7 @@ class ReservationsTest {
 
     @Test
     void findCollisionPredecessorCollision() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -72,7 +72,7 @@ class ReservationsTest {
 
     @Test
     void findCollisionPredecessorCollision_NotNormalized() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -82,7 +82,7 @@ class ReservationsTest {
 
     @Test
     void findCollisionSuccessorCollision() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
 
@@ -92,7 +92,7 @@ class ReservationsTest {
 
     @Test
     void addValid() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         reservations.add(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"));
         assertThat(reservations.asList()).hasSize(1);
@@ -106,7 +106,7 @@ class ReservationsTest {
 
     @Test
     void addInvalid_EndOfIntervalBeforeStart() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         assertThatThrownBy(() -> reservations.add(instant("2025-01-01T13:00:00Z"), instant("2025-01-01T12:00:00Z")))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -116,7 +116,7 @@ class ReservationsTest {
 
     @Test
     void addInvalid_ZeroIntervalLength() {
-        var reservations = new Reservations();
+        var reservations = new RoomReservations();
 
         assertThatThrownBy(() -> reservations.add(instant("2025-01-01T13:00:00Z"), instant("2025-01-01T13:00:00Z")))
                 .isInstanceOf(IllegalArgumentException.class);

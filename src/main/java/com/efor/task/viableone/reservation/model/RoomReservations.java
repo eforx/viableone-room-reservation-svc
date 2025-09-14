@@ -22,7 +22,7 @@ import java.util.TreeMap;
  *
  * <p><strong>Thread-safety:</strong> Not thread-safe.</p>
  */
-public class Reservations {
+public class RoomReservations {
     private final NavigableMap<Instant, ReservationInterval> byStart = new TreeMap<>();
 
     /**
@@ -64,13 +64,16 @@ public class Reservations {
      *
      * @param start inclusive start instant (will be truncated to minutes)
      * @param end exclusive end instant (must be after {@code start})
+     * @return the added interval
      * @throws NullPointerException if {@code start} or {@code end} is null
      * @throws IllegalArgumentException if {@code start} is not before {@code end}
      */
-    public void add(Instant start, Instant end) {
+    public ReservationInterval add(Instant start, Instant end) {
         var normalizedStart = normalize(start);
         var normalizedEnd = normalize(end);
-        byStart.put(normalizedStart, new ReservationInterval(normalizedStart, normalizedEnd));
+        var interval = new ReservationInterval(normalizedStart, normalizedEnd);
+        byStart.put(normalizedStart, interval);
+        return interval;
     }
 
     /**
