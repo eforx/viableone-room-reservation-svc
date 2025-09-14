@@ -219,6 +219,7 @@ logbook:
 - Room name validation (regex?)
 - Possible separation of integration testing (future DB) and unit testing using service mocking
 - Optimization for a large number of rooms
+- Contract first approach (creating an OpenAPI specification)
 
 ## License
 
