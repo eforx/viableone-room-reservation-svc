@@ -4,17 +4,20 @@ import com.efor.task.viableone.reservation.RoomReservation;
 import com.efor.task.viableone.reservation.RoomReservationInfo;
 import com.efor.task.viableone.reservation.RoomReservationResult;
 import com.efor.task.viableone.reservation.RoomReservationService;
-import com.efor.task.viableone.reservation.validation.RoomReservationValidator;
 import com.efor.task.viableone.reservation.model.ReservationInterval;
 import com.efor.task.viableone.reservation.model.RoomReservations;
+import com.efor.task.viableone.reservation.validation.IntervalValidator;
+import com.efor.task.viableone.reservation.validation.RoomReservationValidator;
 import com.google.common.util.concurrent.Striped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -30,13 +33,16 @@ import java.util.stream.Collectors;
 @Service
 public class DefaultRoomReservationService implements RoomReservationService {
 
-    public DefaultRoomReservationService(RoomReservationValidator roomReservationValidator) {
+    public DefaultRoomReservationService(RoomReservationValidator roomReservationValidator,
+                                         IntervalValidator intervalValidator) {
         this.roomReservationValidator = roomReservationValidator;
+        this.intervalValidator = intervalValidator;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultRoomReservationService.class);
 
     private final RoomReservationValidator roomReservationValidator;
+    private final IntervalValidator intervalValidator;
     private final Map<String, RoomReservations> roomReservationsMap = new ConcurrentHashMap<>();
     private final Striped<Lock> roomLocks = Striped.lock(1024);
 
@@ -98,6 +104,27 @@ public class DefaultRoomReservationService implements RoomReservationService {
     }
 
     @Override
+    public Optional<String> findAvailableRoom(Instant reservationStart, Instant reservationEnd) {
+        logger.info("Find available room. reservationStart={}, reservationEnd={}", reservationStart, reservationEnd);
+
+        intervalValidator.validate(reservationStart, reservationEnd);
+
+        var result = roomReservationsMap.entrySet().stream()
+                .filter(e -> e.getValue().hasNoConflict(reservationStart, reservationEnd))
+                .findFirst()
+                .map(Map.Entry::getKey);
+
+        result.ifPresentOrElse(
+                roomId -> logger.info("Available room found. roomId='{}', reservationStart={}, reservationEnd={}",
+                        roomId, reservationStart, reservationEnd),
+                () -> logger.info("Available room not found. reservationStart={}, reservationEnd={}",
+                        reservationStart, reservationEnd)
+        );
+
+        return result;
+    }
+
+    @Override
     public List<RoomReservationInfo> getReservations(String roomId) {
         var roomReservations = roomReservationsMap.get(roomId);
         if (roomReservations == null) {
@@ -141,6 +168,13 @@ public class DefaultRoomReservationService implements RoomReservationService {
                         (a, b) -> b,
                         LinkedHashMap::new
                 ));
+    }
+
+    /**
+     * For testing purposes.
+     */
+    void reset() {
+        roomReservationsMap.clear();
     }
 
     private RoomReservations findOrCreateRoomReservations(String roomId) {

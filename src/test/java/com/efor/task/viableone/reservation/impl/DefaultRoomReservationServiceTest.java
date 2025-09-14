@@ -1,20 +1,35 @@
 package com.efor.task.viableone.reservation.impl;
 
+import com.efor.task.viableone.reservation.ReservationConfig;
 import com.efor.task.viableone.reservation.RoomReservation;
-import com.efor.task.viableone.reservation.validation.DefaultIntervalValidator;
-import com.efor.task.viableone.reservation.validation.DefaultRoomReservationValidator;
+import com.efor.task.viableone.reservation.validation.IntervalValidatorException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.Instant;
 
+@SpringBootTest(
+        classes = {ReservationConfig.class}
+)
 class DefaultRoomReservationServiceTest {
+
+    public DefaultRoomReservationServiceTest(@Autowired DefaultRoomReservationService roomReservationService) {
+        this.service = roomReservationService;
+    }
+
+    private final DefaultRoomReservationService service;
+
+    @BeforeEach
+    void setUp() {
+        service.reset();
+    }
 
     @Test
     void bookRoom() {
-        DefaultRoomReservationService service = createService();
-
         var result = service.bookRoom(
                 new RoomReservation(
                         "room-A",
@@ -31,8 +46,6 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void bookRoom_TrimRoomName() {
-        DefaultRoomReservationService service = createService();
-
         var result = service.bookRoom(
                 new RoomReservation(
                         "  room-A ",
@@ -49,16 +62,12 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void getReservations_empty() {
-        DefaultRoomReservationService service = createService();
-
         assertThatThrownBy(() -> service.getReservations("room-A"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void getReservations() {
-        DefaultRoomReservationService service = createService();
-
         service.bookRoom(
                 new RoomReservation(
                         "room-A",
@@ -93,15 +102,11 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void getAllReservations_empty() {
-        DefaultRoomReservationService service = createService();
-
         assertThat(service.getAllReservations()).isEmpty();
     }
 
     @Test
     void getAllReservations() {
-        DefaultRoomReservationService service = createService();
-
         service.bookRoom(
                 new RoomReservation(
                         "room-A",
@@ -132,12 +137,54 @@ class DefaultRoomReservationServiceTest {
         assertThat(result.get("room-B")).hasSize(1);
     }
 
+    @Test
+    void findAvailableRoom_WrongInterval() {
+        assertThatThrownBy(() ->
+                service.findAvailableRoom(instant("2025-01-01T13:00:00Z"), instant("2025-01-01T12:00:00Z"))
+        ).isInstanceOf(IntervalValidatorException.class);
+    }
+
+    @Test
+    void findAvailableRoom_NoReservation() {
+        assertThat(
+                service.findAvailableRoom(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"))
+        ).isEmpty();
+    }
+
+    @Test
+    void findAvailableRoom_Collision() {
+        service.bookRoom(
+                new RoomReservation(
+                        "room-A",
+                        instant("2025-01-01T11:00:00Z"),
+                        instant("2025-01-01T14:00:00Z")
+                )
+        );
+
+        assertThat(
+                service.findAvailableRoom(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"))
+        ).isEmpty();
+    }
+
+
+    @Test
+    void findAvailableRoom() {
+        service.bookRoom(
+                new RoomReservation(
+                        "room-A",
+                        instant("2025-01-01T13:00:00Z"),
+                        instant("2025-01-01T14:00:00Z")
+                )
+        );
+
+        assertThat(
+                service.findAvailableRoom(instant("2025-01-01T12:00:00Z"), instant("2025-01-01T13:00:00Z"))
+        ).isNotEmpty()
+                .contains("room-A");
+    }
+
+
     private Instant instant(String s) {
         return Instant.parse(s);
     }
-
-    private DefaultRoomReservationService createService() {
-        return new DefaultRoomReservationService(new DefaultRoomReservationValidator(new DefaultIntervalValidator()));
-    }
-
 }

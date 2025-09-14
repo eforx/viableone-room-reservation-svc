@@ -56,6 +56,18 @@ public class RoomReservations {
     }
 
     /**
+     * Returns true if there is no interval with {@code [start, end]}.
+     *
+     * Use {@link #findCollision(Instant, Instant)} to find a conflicting interval.
+     * @param start inclusive start instant (will be truncated to minutes)
+     * @param end exclusive end instant (must be after {@code start})
+     * @return true if there is no interval with {@code [start, end]}
+     */
+    public boolean hasNoConflict(Instant start, Instant end) {
+        return findCollision(start, end).isEmpty();
+    }
+
+    /**
      * Adds the interval {@code [start, end)} without performing a conflict check.
      *
      * <p>Call {@link #findCollision(Instant, Instant)} first if you need to prevent overlaps.</p>

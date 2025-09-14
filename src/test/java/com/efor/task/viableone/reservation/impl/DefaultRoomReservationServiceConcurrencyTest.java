@@ -1,9 +1,11 @@
 package com.efor.task.viableone.reservation.impl;
 
+import com.efor.task.viableone.reservation.ReservationConfig;
 import com.efor.task.viableone.reservation.RoomReservation;
-import com.efor.task.viableone.reservation.validation.DefaultIntervalValidator;
-import com.efor.task.viableone.reservation.validation.DefaultRoomReservationValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
@@ -23,12 +25,24 @@ import java.util.concurrent.TimeUnit;
  * Each thread generates 100 unique, non-overlapping intervals truncated to whole minutes.
  * Intervals across ALL threads are globally non-overlapping by construction.
  */
+@SpringBootTest(
+        classes = {ReservationConfig.class}
+)
 class DefaultRoomReservationServiceConcurrencyTest {
+
+    public DefaultRoomReservationServiceConcurrencyTest(@Autowired DefaultRoomReservationService roomReservationService) {
+        this.service = roomReservationService;
+    }
+
+    private final DefaultRoomReservationService service;
+
+    @BeforeEach
+    void setUp() {
+        service.reset();
+    }
 
     @Test
     void bookRoom() throws Exception {
-        var service = new DefaultRoomReservationService(new DefaultRoomReservationValidator(new DefaultIntervalValidator()));
-
         // --- Configuration ---
         final int threads = 3;                // configurable number of worker threads
         final int intervalsPerThread = 1000;  // each thread generates this many intervals
