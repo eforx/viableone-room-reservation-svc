@@ -20,12 +20,7 @@ public class RoomReservationApplicationConfig {
     @Bean
     Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
         return builder -> builder
-                .modules(new JavaTimeModule())                // explicit; Boot also auto-adds Module beans
+                .modules(new JavaTimeModule())
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
-
-    @Bean
-    JavaTimeModule javaTimeModule() {
-        return new JavaTimeModule();
     }
 }
