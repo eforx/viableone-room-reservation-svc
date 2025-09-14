@@ -5,6 +5,11 @@ spring:
 logbook:
   format:
     style: http
+  predicate:
+    exclude:
+      - path: "/v3/api-docs"
+      - path: "/v3/api-docs/**"
+      - path: "/swagger-ui/**"
 
 management:
   endpoints:
