@@ -23,7 +23,10 @@ import java.util.TreeMap;
  * <p><strong>Thread-safety:</strong> Not thread-safe.</p>
  */
 public class RoomReservations {
-    private final NavigableMap<Instant, ReservationInterval> byStart = new TreeMap<>();
+    /**
+     * Ordered by interval start time.
+     */
+    private final NavigableMap<Instant, ReservationInterval> intervals = new TreeMap<>();
 
     /**
      * Finds a colliding interval with {@code [start, end)} if one exists.
@@ -44,11 +47,11 @@ public class RoomReservations {
         var normalizedEnd = normalize(end);
         var candidate = new ReservationInterval(normalizedStart, normalizedEnd);
 
-        var predecessor = byStart.floorEntry(normalizedStart);
+        var predecessor = intervals.floorEntry(normalizedStart);
         if (predecessor != null && predecessor.getValue().overlaps(candidate)) {
             return Optional.of(predecessor.getValue());
         }
-        var successor = byStart.ceilingEntry(normalizedStart);
+        var successor = intervals.ceilingEntry(normalizedStart);
         if (successor != null && successor.getValue().overlaps(candidate)) {
             return Optional.of(successor.getValue());
         }
@@ -84,7 +87,7 @@ public class RoomReservations {
         var normalizedStart = normalize(start);
         var normalizedEnd = normalize(end);
         var interval = new ReservationInterval(normalizedStart, normalizedEnd);
-        byStart.put(normalizedStart, interval);
+        intervals.put(normalizedStart, interval);
         return interval;
     }
 
@@ -94,7 +97,7 @@ public class RoomReservations {
      * @return immutable, start-ordered snapshot
      */
     public List<ReservationInterval> asList() {
-        return List.copyOf(byStart.values());
+        return List.copyOf(intervals.values());
     }
 
     /**
@@ -103,7 +106,7 @@ public class RoomReservations {
      * @return current number of reservations
      */
     public int size() {
-        return byStart.size();
+        return intervals.size();
     }
 
     private Instant normalize(Instant instant) {
