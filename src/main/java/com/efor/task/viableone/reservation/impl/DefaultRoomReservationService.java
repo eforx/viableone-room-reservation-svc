@@ -4,6 +4,7 @@ import com.efor.task.viableone.reservation.RoomReservation;
 import com.efor.task.viableone.reservation.RoomReservationInfo;
 import com.efor.task.viableone.reservation.RoomReservationResult;
 import com.efor.task.viableone.reservation.RoomReservationService;
+import com.efor.task.viableone.reservation.validation.RoomReservationValidator;
 import com.efor.task.viableone.reservation.model.ReservationInterval;
 import com.efor.task.viableone.reservation.model.RoomReservations;
 import com.google.common.util.concurrent.Striped;
@@ -28,21 +29,31 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DefaultRoomReservationService implements RoomReservationService {
-    private final Logger logger = LoggerFactory.getLogger(DefaultRoomReservationService.class);
+
+    public DefaultRoomReservationService(RoomReservationValidator roomReservationValidator) {
+        this.roomReservationValidator = roomReservationValidator;
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(DefaultRoomReservationService.class);
+
+    private final RoomReservationValidator roomReservationValidator;
     private final Map<String, RoomReservations> roomReservationsMap = new ConcurrentHashMap<>();
     private final Striped<Lock> roomLocks = Striped.lock(1024);
 
     public RoomReservationResult bookRoom(RoomReservation roomReservation) {
-        // TODO: add validator
-
         logger.info("Room reservation. roomReservation={}", roomReservation);
+
+        roomReservationValidator.validate(roomReservation);
+
+        // Normalize room id
+        var roomId = roomReservation.roomId().trim();
 
         Lock lock = roomLocks.get(roomReservation.roomId());
         boolean acquired = false;
         try {
             acquired = lock.tryLock(60, TimeUnit.SECONDS);
             if (!acquired) {
-                throw new IllegalStateException("Room '" + roomReservation.roomId() + "' is busy; try again.");
+                throw new IllegalStateException("Room '" + roomId + "' is busy; try again.");
             }
 
             var reservations = findOrCreateRoomReservations(roomReservation.roomId());
@@ -50,13 +61,13 @@ public class DefaultRoomReservationService implements RoomReservationService {
                     .map(collisionInterval -> {
                         logger.info("Room reservation has failed - collision detected. " +
                                         "roomId='{}', requestedInterval={}-{}, collisionInterval={}-{}",
-                                roomReservation.roomId(),
+                                roomId,
                                 roomReservation.reservationStart(),
                                 roomReservation.reservationEnd(),
                                 collisionInterval.start(),
                                 collisionInterval.end());
                         return new RoomReservationResult(
-                                roomReservation.roomId(),
+                                roomId,
                                 collisionInterval.start(),
                                 collisionInterval.end(),
                                 false
@@ -68,13 +79,13 @@ public class DefaultRoomReservationService implements RoomReservationService {
                         );
 
                         var result = new RoomReservationResult(
-                                roomReservation.roomId(),
+                                roomId,
                                 reservation.start(),
                                 reservation.end(),
                                 true
                         );
                         logger.info("Room reservation has been successful. roomId='{}', requestedInterval={}-{}",
-                                roomReservation.roomId(),
+                                roomId,
                                 roomReservation.reservationStart(),
                                 roomReservation.reservationEnd());
                         return result;

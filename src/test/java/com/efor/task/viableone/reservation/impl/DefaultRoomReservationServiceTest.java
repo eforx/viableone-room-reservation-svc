@@ -1,6 +1,8 @@
 package com.efor.task.viableone.reservation.impl;
 
 import com.efor.task.viableone.reservation.RoomReservation;
+import com.efor.task.viableone.reservation.validation.DefaultIntervalValidator;
+import com.efor.task.viableone.reservation.validation.DefaultRoomReservationValidator;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -11,7 +13,7 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void bookRoom() {
-        DefaultRoomReservationService service = new DefaultRoomReservationService();
+        DefaultRoomReservationService service = createService();
 
         var result = service.bookRoom(
                 new RoomReservation(
@@ -22,13 +24,32 @@ class DefaultRoomReservationServiceTest {
         );
 
         assertThat(result.isNewReservation()).isEqualTo(true);
+        assertThat(result.roomId()).isEqualTo("room-A");
+        assertThat(result.reservationStart()).isEqualTo(instant("2025-01-01T12:00:00Z"));
+        assertThat(result.reservationEnd()).isEqualTo(instant("2025-01-01T13:00:00Z"));
+    }
+
+    @Test
+    void bookRoom_TrimRoomName() {
+        DefaultRoomReservationService service = createService();
+
+        var result = service.bookRoom(
+                new RoomReservation(
+                        "  room-A ",
+                        instant("2025-01-01T12:00:00Z"),
+                        instant("2025-01-01T13:00:00Z")
+                )
+        );
+
+        assertThat(result.isNewReservation()).isEqualTo(true);
+        assertThat(result.roomId()).isEqualTo("room-A");
         assertThat(result.reservationStart()).isEqualTo(instant("2025-01-01T12:00:00Z"));
         assertThat(result.reservationEnd()).isEqualTo(instant("2025-01-01T13:00:00Z"));
     }
 
     @Test
     void getReservations_empty() {
-        DefaultRoomReservationService service = new DefaultRoomReservationService();
+        DefaultRoomReservationService service = createService();
 
         assertThatThrownBy(() -> service.getReservations("room-A"))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -36,7 +57,7 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void getReservations() {
-        DefaultRoomReservationService service = new DefaultRoomReservationService();
+        DefaultRoomReservationService service = createService();
 
         service.bookRoom(
                 new RoomReservation(
@@ -72,14 +93,14 @@ class DefaultRoomReservationServiceTest {
 
     @Test
     void getAllReservations_empty() {
-        DefaultRoomReservationService service = new DefaultRoomReservationService();
+        DefaultRoomReservationService service = createService();
 
         assertThat(service.getAllReservations()).isEmpty();
     }
 
     @Test
     void getAllReservations() {
-        DefaultRoomReservationService service = new DefaultRoomReservationService();
+        DefaultRoomReservationService service = createService();
 
         service.bookRoom(
                 new RoomReservation(
@@ -113,6 +134,10 @@ class DefaultRoomReservationServiceTest {
 
     private Instant instant(String s) {
         return Instant.parse(s);
+    }
+
+    private DefaultRoomReservationService createService() {
+        return new DefaultRoomReservationService(new DefaultRoomReservationValidator(new DefaultIntervalValidator()));
     }
 
 }

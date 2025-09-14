@@ -1,5 +1,9 @@
 package com.efor.task.viableone.reservation;
 
+import com.efor.task.viableone.reservation.validation.IntervalValidatorException;
+import com.efor.task.viableone.reservation.validation.RoomReservationValidatorException;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +23,9 @@ public interface RoomReservationService {
      *
      * @param roomReservation the reservation request
      * @return the outcome of the booking attempt; never {@code null}
-     * @throws IllegalStateException if the booking cannot be processed at the moment
+     * @throws IllegalStateException             if the booking cannot be processed at the moment
+     * @throws RoomReservationValidatorException if the room reservation request is invalid
+     * @throws IntervalValidatorException if the interval is invalid
      */
     RoomReservationResult bookRoom(RoomReservation roomReservation);
 

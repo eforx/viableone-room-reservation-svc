@@ -1,6 +1,8 @@
 package com.efor.task.viableone.reservation.impl;
 
 import com.efor.task.viableone.reservation.RoomReservation;
+import com.efor.task.viableone.reservation.validation.DefaultIntervalValidator;
+import com.efor.task.viableone.reservation.validation.DefaultRoomReservationValidator;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +27,7 @@ class DefaultRoomReservationServiceConcurrencyTest {
 
     @Test
     void bookRoom() throws Exception {
-        var service = new DefaultRoomReservationService();
+        var service = new DefaultRoomReservationService(new DefaultRoomReservationValidator(new DefaultIntervalValidator()));
 
         // --- Configuration ---
         final int threads = 3;                // configurable number of worker threads
